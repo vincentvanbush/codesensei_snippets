@@ -8,6 +8,29 @@ class Game
     layout_ships
   end
 
+  def guess(a, b)
+    raise ArgumentError if a > 9 || a < 0 || b > 9 || b < 0 || @board[a][b] != :empty
+    ship = @ships.select { |ship| ship.alive? }.find { |ship| ship.initial_fields.include?([a, b]) }
+    if ship
+      ship.strike(a, b)
+      @board[a][b] = :hit
+      if ship.alive?
+        # niezatopiony
+        :hit
+      else
+        # zatopiony
+        # TODO: oznaczyć pudła dookoła zatopionego statku
+        :sunk
+      end
+    else
+      @board[a][b] = :miss
+    end
+  end
+
+  def game_over?
+    @ships.none?(&:alive?)
+  end
+
   private
 
   def create_board
@@ -18,8 +41,9 @@ class Game
     # rozmieszczenie czteromasztowca
     @ships = []
     layout_ship(4)
-    layout_ship(3)
-    layout_ship(3)
+    2.times { layout_ship(3) }
+    3.times { layout_ship(2) }
+    4.times { layout_ship(1) }
   end
 
   def layout_ship(count)
